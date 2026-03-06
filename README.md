@@ -1,0 +1,163 @@
+# Skeletal Snake — Base Mini App
+
+A skeletal-style Snake game built as a Base Mini App (Farcaster Frame v2).
+
+## Features
+
+- Glowing skeletal snake rendered on HTML5 Canvas
+- Smooth rib/vertebra animation synced to movement direction
+- Forked tongue animation on the snake head
+- Progressive speed increase as the snake grows
+- Mobile-first: swipe gestures + on-screen D-pad + keyboard (arrows / WASD)
+- Game Over screen with score + high score + restart
+- Pause support (Escape / P key, or Pause button)
+- Farcaster Mini App manifest at `/.well-known/farcaster.json`
+- Ready signal sent via `@farcaster/miniapp-sdk` on load
+
+---
+
+## Project Structure
+
+```
+snake-base-miniapp/
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx                  # Root layout + fc:frame meta tag
+│   │   ├── page.tsx                    # Home page, signals sdk.ready()
+│   │   ├── globals.css
+│   │   ├── .well-known/
+│   │   │   └── farcaster.json/
+│   │   │       └── route.ts            # Farcaster manifest endpoint
+│   │   └── api/
+│   │       └── webhook/
+│   │           └── route.ts            # Optional event webhook
+│   ├── components/
+│   │   ├── SnakeGame.tsx               # Main orchestrator + overlays
+│   │   ├── GameCanvas.tsx              # Canvas renderer (skeletal drawing)
+│   │   ├── MobileControls.tsx          # D-pad touch controls
+│   │   └── ScoreDisplay.tsx            # Score / best / level bar
+│   ├── hooks/
+│   │   ├── useSnakeGame.ts             # Game state machine + loop
+│   │   └── useSwipeControls.ts         # Swipe gesture detection
+│   └── lib/
+│       ├── constants.ts                # Cell size, speeds, colours
+│       └── types.ts                    # Shared TypeScript types
+├── package.json
+├── next.config.ts
+├── tailwind.config.ts
+├── tsconfig.json
+└── README.md
+```
+
+---
+
+## Getting Started
+
+### 1. Install dependencies
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+### 2. Run locally
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 3. Environment variables
+
+Create a `.env.local` file:
+
+```env
+NEXT_PUBLIC_APP_URL=https://your-domain.com
+```
+
+---
+
+## Deploying as a Base Mini App
+
+### Step 1 — Deploy to Vercel (recommended)
+
+```bash
+npm install -g vercel
+vercel
+```
+
+Set `NEXT_PUBLIC_APP_URL` to your production URL in the Vercel dashboard.
+
+### Step 2 — Add required public assets
+
+Place these images in the `/public` folder:
+
+| File | Size | Purpose |
+|------|------|---------|
+| `icon.png` | 200×200 px | App icon in Farcaster |
+| `og-image.png` | 1200×630 px | Preview image for the frame |
+| `splash.png` | 200×200 px | Splash screen while loading |
+
+### Step 3 — Generate accountAssociation
+
+1. Go to [https://warpcast.com/~/developers/frames](https://warpcast.com/~/developers/frames)
+2. Enter your production domain
+3. Sign with your Farcaster account
+4. Copy the `header`, `payload`, and `signature` values
+5. Paste them into `src/app/.well-known/farcaster.json/route.ts`
+
+### Step 4 — Register with Base / Farcaster
+
+Share your frame URL in Warpcast or submit it to the Base Mini App directory.
+The frame will be discovered via the `fc:frame` meta tag in `layout.tsx` and
+the manifest at `/.well-known/farcaster.json`.
+
+---
+
+## Controls
+
+| Input | Action |
+|-------|--------|
+| Arrow keys / WASD | Change direction |
+| Swipe on canvas | Change direction (mobile) |
+| D-pad buttons | Change direction (mobile) |
+| Escape / P | Pause / Resume |
+
+---
+
+## Customisation
+
+| File | What to change |
+|------|---------------|
+| `src/lib/constants.ts` | Cell size, initial speed, min speed, colors |
+| `src/components/GameCanvas.tsx` | Snake/food rendering style |
+| `src/app/layout.tsx` | Frame metadata title, description |
+| `src/app/.well-known/farcaster.json/route.ts` | Manifest details |
+
+### Adding wallet / leaderboard (future)
+
+Install OnchainKit:
+
+```bash
+npm install @coinbase/onchainkit
+```
+
+Wrap the app with `<OnchainKitProvider chain={base}>` in `layout.tsx`, then use
+`useAccount`, `useConnect`, and Base smart contract calls to store scores
+on-chain or in a leaderboard contract.
+
+---
+
+## Tech Stack
+
+- **Next.js 14** (App Router)
+- **React 18**
+- **TypeScript**
+- **TailwindCSS**
+- **HTML5 Canvas** (skeletal snake rendering via `requestAnimationFrame`)
+- **@farcaster/miniapp-sdk** (ready signal)
+- **@coinbase/onchainkit** (ready for wallet integration)
