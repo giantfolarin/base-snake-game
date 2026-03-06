@@ -2,16 +2,16 @@
 export const CELL_SIZE = 20;
 
 // Starting game tick interval in ms (lower = faster)
-export const INITIAL_SPEED = 240;
+export const INITIAL_SPEED = 350;
 
 // Minimum tick interval (max speed cap)
-export const MIN_SPEED = 85;
+export const MIN_SPEED = 80;
 
 // Speed reduction per food eaten (ms)
-export const SPEED_DECREASE = 4;
+export const SPEED_DECREASE = 10;
 
 // Initial snake length
-export const INITIAL_SNAKE_LENGTH = 4;
+export const INITIAL_SNAKE_LENGTH = 1;
 
 // Game board checkered colors (retro green)
 export const BOARD_LIGHT = "#92c844";
