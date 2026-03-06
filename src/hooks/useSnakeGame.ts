@@ -13,17 +13,35 @@ function randomFood(snake: Position[], obstacles: Position[], cols: number, rows
     ...snake.map((s) => `${s.x},${s.y}`),
     ...obstacles.map((o) => `${o.x},${o.y}`),
   ]);
-  const totalCells = cols * rows;
-  if (occupied.size >= totalCells) return { x: 0, y: 0 };
 
-  let pos: Position;
-  do {
-    pos = {
-      x: Math.floor(Math.random() * cols),
-      y: Math.floor(Math.random() * rows),
-    };
-  } while (occupied.has(`${pos.x},${pos.y}`));
-  return pos;
+  // Keep food at least 1 cell away from all walls
+  const margin = 1;
+  const minX = margin;
+  const maxX = cols - 1 - margin;
+  const minY = margin;
+  const maxY = rows - 1 - margin;
+
+  // Collect all valid inner cells first
+  const candidates: Position[] = [];
+  for (let x = minX; x <= maxX; x++) {
+    for (let y = minY; y <= maxY; y++) {
+      if (!occupied.has(`${x},${y}`)) candidates.push({ x, y });
+    }
+  }
+
+  // Fallback: any unoccupied cell if inner area is full
+  if (candidates.length === 0) {
+    let pos: Position;
+    do {
+      pos = {
+        x: Math.floor(Math.random() * cols),
+        y: Math.floor(Math.random() * rows),
+      };
+    } while (occupied.has(`${pos.x},${pos.y}`));
+    return pos;
+  }
+
+  return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
 function randomObstacles(

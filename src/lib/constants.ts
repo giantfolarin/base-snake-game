@@ -2,13 +2,13 @@
 export const CELL_SIZE = 20;
 
 // Starting game tick interval in ms (lower = faster)
-export const INITIAL_SPEED = 200;
+export const INITIAL_SPEED = 240;
 
 // Minimum tick interval (max speed cap)
-export const MIN_SPEED = 70;
+export const MIN_SPEED = 85;
 
 // Speed reduction per food eaten (ms)
-export const SPEED_DECREASE = 6;
+export const SPEED_DECREASE = 4;
 
 // Initial snake length
 export const INITIAL_SNAKE_LENGTH = 4;
@@ -21,4 +21,4 @@ export const BOARD_DARK  = "#84b83c";
 export const SELECTION_BG = "#84c234";
 
 // Number of obstacle blocks placed at game start
-export const OBSTACLE_COUNT = 6;
+export const OBSTACLE_COUNT = 4;
