@@ -1,16 +1,16 @@
-# Skeletal Snake — Base Mini App
+# Snake — Base Mini App
 
-A skeletal-style Snake game built as a Base Mini App (Farcaster Frame v2).
+A Snake game built as a Base Mini App (Farcaster Mini App).
 
 ## Features
 
-- Glowing skeletal snake rendered on HTML5 Canvas
-- Smooth rib/vertebra animation synced to movement direction
-- Forked tongue animation on the snake head
+- Rainbow snake rendered on HTML5 Canvas
+- Retro pixel art UI with Press Start 2P font
+- Game Boy-inspired selection screen
 - Progressive speed increase as the snake grows
-- Mobile-first: swipe gestures + on-screen D-pad + keyboard (arrows / WASD)
-- Game Over screen with score + high score + restart
-- Pause support (Escape / P key, or Pause button)
+- Mobile-first: swipe gestures + keyboard (arrow keys)
+- Score + high score tracking
+- Sound toggle and share button
 - Farcaster Mini App manifest at `/.well-known/farcaster.json`
 - Ready signal sent via `@farcaster/miniapp-sdk` on load
 
@@ -33,9 +33,8 @@ snake-base-miniapp/
 │   │           └── route.ts            # Optional event webhook
 │   ├── components/
 │   │   ├── SnakeGame.tsx               # Main orchestrator + overlays
-│   │   ├── GameCanvas.tsx              # Canvas renderer (skeletal drawing)
-│   │   ├── MobileControls.tsx          # D-pad touch controls
-│   │   └── ScoreDisplay.tsx            # Score / best / level bar
+│   │   ├── GameCanvas.tsx              # Canvas renderer (rainbow snake)
+│   │   └── ScoreDisplay.tsx            # Score / high score top bar
 │   ├── hooks/
 │   │   ├── useSnakeGame.ts             # Game state machine + loop
 │   │   └── useSwipeControls.ts         # Swipe gesture detection
@@ -43,7 +42,7 @@ snake-base-miniapp/
 │       ├── constants.ts                # Cell size, speeds, colours
 │       └── types.ts                    # Shared TypeScript types
 ├── package.json
-├── next.config.ts
+├── next.config.mjs
 ├── tailwind.config.ts
 ├── tsconfig.json
 └── README.md
@@ -57,10 +56,6 @@ snake-base-miniapp/
 
 ```bash
 npm install
-# or
-yarn install
-# or
-pnpm install
 ```
 
 ### 2. Run locally
@@ -122,10 +117,8 @@ the manifest at `/.well-known/farcaster.json`.
 
 | Input | Action |
 |-------|--------|
-| Arrow keys / WASD | Change direction |
+| Arrow keys | Change direction |
 | Swipe on canvas | Change direction (mobile) |
-| D-pad buttons | Change direction (mobile) |
-| Escape / P | Pause / Resume |
 
 ---
 
@@ -133,22 +126,10 @@ the manifest at `/.well-known/farcaster.json`.
 
 | File | What to change |
 |------|---------------|
-| `src/lib/constants.ts` | Cell size, initial speed, min speed, colors |
+| `src/lib/constants.ts` | Cell size, initial speed, colors |
 | `src/components/GameCanvas.tsx` | Snake/food rendering style |
 | `src/app/layout.tsx` | Frame metadata title, description |
 | `src/app/.well-known/farcaster.json/route.ts` | Manifest details |
-
-### Adding wallet / leaderboard (future)
-
-Install OnchainKit:
-
-```bash
-npm install @coinbase/onchainkit
-```
-
-Wrap the app with `<OnchainKitProvider chain={base}>` in `layout.tsx`, then use
-`useAccount`, `useConnect`, and Base smart contract calls to store scores
-on-chain or in a leaderboard contract.
 
 ---
 
@@ -158,6 +139,6 @@ on-chain or in a leaderboard contract.
 - **React 18**
 - **TypeScript**
 - **TailwindCSS**
-- **HTML5 Canvas** (skeletal snake rendering via `requestAnimationFrame`)
+- **HTML5 Canvas**
 - **@farcaster/miniapp-sdk** (ready signal)
 - **@coinbase/onchainkit** (ready for wallet integration)
