@@ -925,11 +925,12 @@ function GameContent({
 
   useEffect(() => {
     function measure() {
-      const BORDER = 4;
-      const boardW = Math.min(window.innerWidth * 0.9, 480);
-      const boardH = Math.min(window.innerHeight * 0.6, boardW * 0.75) - BORDER * 2;
-      const cols   = Math.max(10, Math.floor(boardW / CELL_SIZE));
-      const rows   = Math.max(8,  Math.floor(boardH / CELL_SIZE));
+      const BORDER  = 4;
+      const SCORE_H = 55; // ScoreDisplay 52px + 3px border
+      const availW  = window.innerWidth  - BORDER * 2;
+      const availH  = window.innerHeight - SCORE_H - BORDER * 2 - 4;
+      const cols    = Math.max(10, Math.floor(availW / CELL_SIZE));
+      const rows    = Math.max(8,  Math.floor(availH / CELL_SIZE));
       setCanvasSize({ w: cols * CELL_SIZE, h: rows * CELL_SIZE });
       setGrid({ cols, rows });
     }
@@ -976,11 +977,8 @@ function GameContent({
     prevScoreRef.current = state.score;
   }, [state.score, playEat]);
 
-  const isPlaying  = state.gameState === "playing";
   const isGameOver = state.gameState === "gameover";
   const isPaused   = state.gameState === "paused";
-
-  const containerW = canvasSize.w > 0 ? canvasSize.w + 8 : 0;
 
   return (
     <div
@@ -989,39 +987,34 @@ function GameContent({
         height: "100dvh",
         background: "#84c234",
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        flexDirection: "column",
         overflow: "hidden",
         position: "relative",
       }}
     >
+      <ScoreDisplay
+        score={state.score}
+        highScore={state.highScore}
+        soundOn={soundOn}
+        onSoundToggle={onSoundToggle}
+        onShare={onShare}
+        onClose={onClose}
+      />
+
       {canvasSize.w > 0 && grid.cols > 0 && (
         <div
           style={{
+            flex: 1,
             display: "flex",
-            flexDirection: "column",
-            alignItems: "stretch",
-            gap: 10,
-            width: containerW,
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <div style={{ borderRadius: 6, overflow: "hidden", flexShrink: 0 }}>
-            <ScoreDisplay
-              score={state.score}
-              highScore={state.highScore}
-              soundOn={soundOn}
-              onSoundToggle={onSoundToggle}
-              onShare={onShare}
-              onClose={onClose}
-            />
-          </div>
-
           <div
             style={{
               border: "4px solid #2a5c05",
               borderRadius: 4,
               overflow: "hidden",
-              flexShrink: 0,
               boxShadow: "0 4px 24px rgba(0,0,0,0.35)",
             }}
           >
