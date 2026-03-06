@@ -1,6 +1,6 @@
-# Snake — Base Mini App
+# Retro Classic Snake Game: Built on Base Mini App
 
-A Snake game built as a Base Mini App (Farcaster Mini App).
+A Retro Snake game built on Base App.
 
 ## Features
 
