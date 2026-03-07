@@ -6,7 +6,13 @@ import type { Direction, GameAction, Position, SnakeGameState } from "@/lib/type
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function randomFood(snake: Position[], obstacles: Position[], cols: number, rows: number): Position {
+function randomFood(
+  snake: Position[],
+  obstacles: Position[],
+  cols: number,
+  rows: number,
+  speed: number = INITIAL_SPEED,
+): Position {
   if (cols <= 0 || rows <= 0) return { x: 0, y: 0 };
 
   const occupied = new Set([
@@ -14,14 +20,17 @@ function randomFood(snake: Position[], obstacles: Position[], cols: number, rows
     ...obstacles.map((o) => `${o.x},${o.y}`),
   ]);
 
-  // Keep food at least 1 cell away from all walls
-  const margin = 1;
+  // As the game gets faster (lower speed value), push food toward center.
+  // At INITIAL_SPEED: margin = 1 (anywhere inside border)
+  // At MIN_SPEED: margin = 4 (center third only)
+  const t = Math.max(0, Math.min(1, (INITIAL_SPEED - speed) / (INITIAL_SPEED - MIN_SPEED)));
+  const margin = Math.round(1 + t * 3);
+
   const minX = margin;
   const maxX = cols - 1 - margin;
   const minY = margin;
   const maxY = rows - 1 - margin;
 
-  // Collect all valid inner cells first
   const candidates: Position[] = [];
   for (let x = minX; x <= maxX; x++) {
     for (let y = minY; y <= maxY; y++) {
@@ -29,18 +38,16 @@ function randomFood(snake: Position[], obstacles: Position[], cols: number, rows
     }
   }
 
-  // Fallback: any unoccupied cell if inner area is full
+  // Fallback: expand to full inner area if center zone is full
   if (candidates.length === 0) {
-    let pos: Position;
-    do {
-      pos = {
-        x: Math.floor(Math.random() * cols),
-        y: Math.floor(Math.random() * rows),
-      };
-    } while (occupied.has(`${pos.x},${pos.y}`));
-    return pos;
+    for (let x = 1; x < cols - 1; x++) {
+      for (let y = 1; y < rows - 1; y++) {
+        if (!occupied.has(`${x},${y}`)) candidates.push({ x, y });
+      }
+    }
   }
 
+  if (candidates.length === 0) return { x: 0, y: 0 };
   return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
@@ -219,7 +226,7 @@ function gameReducer(state: SnakeGameState, action: GameAction): SnakeGameState 
         ? Math.max(MIN_SPEED, state.speed - SPEED_DECREASE)
         : state.speed;
       const newFood = ateFood
-        ? randomFood(newSnake, state.obstacles, state.gridCols, state.gridRows)
+        ? randomFood(newSnake, state.obstacles, state.gridCols, state.gridRows, newSpeed)
         : state.food;
 
       return {
