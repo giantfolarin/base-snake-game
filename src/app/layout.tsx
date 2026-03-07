@@ -17,6 +17,7 @@ export const metadata: Metadata = {
   title: "Snake | Base Mini App",
   description: "Classic Snake game built as a Base Mini App",
   other: {
+    "base:app_id": "69aca59ff6467f4d78d30199",
     "fc:frame": JSON.stringify({
       version: "next",
       imageUrl: `${APP_URL}/og-image.png`,
