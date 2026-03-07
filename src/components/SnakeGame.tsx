@@ -464,11 +464,6 @@ function HomeScreen({
         <MenuBtn onClick={onSettings} icon="⚙">SETTINGS</MenuBtn>
         <MenuBtn onClick={onLeaderboard} icon="🏆">LEADERBOARD</MenuBtn>
         <MenuBtn onClick={onAbout} icon="ℹ">ABOUT</MenuBtn>
-
-        {/* Wallet */}
-        <div style={{ width: "100%", marginTop: 6 }}>
-          <WalletButton />
-        </div>
       </div>
     </GreenBg>
   );
