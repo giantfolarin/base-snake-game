@@ -1,16 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useAccount } from "wagmi";
 import { CELL_SIZE } from "@/lib/constants";
 import { useSnakeGame } from "@/hooks/useSnakeGame";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useMusicPlayer } from "@/hooks/useMusicPlayer";
 import { GameCanvas } from "./GameCanvas";
 import { ScoreDisplay } from "./ScoreDisplay";
+import { WalletButton, shortenAddress } from "./WalletButton";
 
 // ─── Leaderboard helpers ──────────────────────────────────────────────────────
 
-type LeaderEntry = { name: string; score: number };
+type LeaderEntry = { name: string; score: number; walletAddress?: string };
 
 function getLeaderboard(): LeaderEntry[] {
   if (typeof window === "undefined") return [];
@@ -21,14 +23,15 @@ function getLeaderboard(): LeaderEntry[] {
   }
 }
 
-function saveScore(name: string, score: number) {
+function saveScore(name: string, score: number, walletAddress?: string) {
   if (!name || score <= 0) return;
   const board = getLeaderboard();
   const existing = board.find((e) => e.name.toLowerCase() === name.toLowerCase());
   if (existing) {
     if (score > existing.score) existing.score = score;
+    if (walletAddress) existing.walletAddress = walletAddress;
   } else {
-    board.push({ name, score });
+    board.push({ name, score, walletAddress });
   }
   board.sort((a, b) => b.score - a.score);
   try {
@@ -53,6 +56,7 @@ export function SnakeGame() {
   const [playerName, setPlayerName] = useState("");
   const [soundOn, setSoundOn]     = useState(true);
   const [musicOn, setMusicOn]     = useState(true);
+  const { address: walletAddress } = useAccount();
 
   function handleShare() {
     if (typeof navigator !== "undefined" && navigator.share) {
@@ -106,6 +110,7 @@ export function SnakeGame() {
   return (
     <GameContent
       playerName={playerName}
+      walletAddress={walletAddress}
       soundOn={soundOn}
       musicOn={musicOn}
       onSoundToggle={() => { setSoundOn((s) => !s); setMusicOn((m) => !m); }}
@@ -459,6 +464,11 @@ function HomeScreen({
         <MenuBtn onClick={onSettings} icon="⚙">SETTINGS</MenuBtn>
         <MenuBtn onClick={onLeaderboard} icon="🏆">LEADERBOARD</MenuBtn>
         <MenuBtn onClick={onAbout} icon="ℹ">ABOUT</MenuBtn>
+
+        {/* Wallet */}
+        <div style={{ width: "100%", marginTop: 6 }}>
+          <WalletButton />
+        </div>
       </div>
     </GreenBg>
   );
@@ -863,20 +873,33 @@ function LeaderboardScreen({ onBack }: { onBack: () => void }) {
                 <span style={{ fontSize: 16, width: 24, textAlign: "center", flexShrink: 0 }}>
                   {medals[i] ?? `${i + 1}.`}
                 </span>
-                <span
-                  style={{
-                    fontFamily: "var(--font-pixel), monospace",
-                    fontSize: "clamp(8px, 2.2vw, 11px)",
-                    color: "#1a2006",
-                    flex: 1,
-                    letterSpacing: 1,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {e.name}
-                </span>
+                <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column", gap: 2 }}>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-pixel), monospace",
+                      fontSize: "clamp(8px, 2.2vw, 11px)",
+                      color: "#1a2006",
+                      letterSpacing: 1,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {e.name}
+                  </span>
+                  {e.walletAddress && (
+                    <span
+                      style={{
+                        fontFamily: "var(--font-pixel), monospace",
+                        fontSize: "clamp(6px, 1.6vw, 8px)",
+                        color: "#2a6010",
+                        letterSpacing: 0.5,
+                      }}
+                    >
+                      {shortenAddress(e.walletAddress)}
+                    </span>
+                  )}
+                </div>
                 <span
                   style={{
                     fontFamily: "var(--font-pixel), monospace",
@@ -905,6 +928,7 @@ function LeaderboardScreen({ onBack }: { onBack: () => void }) {
 
 function GameContent({
   playerName,
+  walletAddress,
   soundOn,
   musicOn,
   onSoundToggle,
@@ -912,6 +936,7 @@ function GameContent({
   onClose,
 }: {
   playerName: string;
+  walletAddress?: string;
   soundOn: boolean;
   musicOn: boolean;
   onSoundToggle: () => void;
@@ -963,7 +988,7 @@ function GameContent({
   useEffect(() => {
     if (state.gameState === "gameover" && !savedRef.current) {
       savedRef.current = true;
-      saveScore(playerName, state.score);
+      saveScore(playerName, state.score, walletAddress);
       if (prevGameStateRef.current === "playing") playGameOver();
     }
     if (state.gameState !== "gameover") savedRef.current = false;

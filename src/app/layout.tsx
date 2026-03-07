@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Press_Start_2P } from "next/font/google";
 import "./globals.css";
+import { Providers } from "./providers";
 
 const pixelFont = Press_Start_2P({
   weight: "400",
@@ -41,7 +42,7 @@ export default function RootLayout({
   return (
     <html lang="en" style={{ height: "100%" }} className={pixelFont.variable}>
       <body style={{ height: "100%", margin: 0 }}>
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
