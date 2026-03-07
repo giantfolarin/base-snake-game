@@ -13,6 +13,9 @@ A Retro Snake game built on Base App.
 - Swipe gestures + keyboard (arrow keys) controls
 - Score + high score tracking with named leaderboard
 - Wallet login via Coinbase Wallet or MetaMask — scores tied to wallet address
+- On-chain leaderboard — scores submitted to a smart contract on Base mainnet
+- Builder attribution via Base Builder Code `bc_4ecjsrzu` appended to every on-chain transaction
+- Leaderboard falls back to localStorage when wallet is disconnected or chain is unavailable
 - Sound toggle and share button
 - Base Mini App manifest at `/.well-known/base/miniapp.json`
 - Farcaster Mini App manifest at `/.well-known/farcaster.json`
@@ -43,10 +46,13 @@ snake-base-miniapp/
 │   │   └── WalletButton.tsx            # Wallet connect / disconnect
 │   ├── hooks/
 │   │   ├── useSnakeGame.ts             # Game state machine + loop
-│   │   └── useSwipeControls.ts         # Swipe gesture detection
+│   │   ├── useSwipeControls.ts         # Swipe gesture detection
+│   │   ├── useSubmitScore.ts           # On-chain score submission (Base mainnet)
+│   │   └── useLeaderboard.ts           # Read top scores from smart contract
 │   └── lib/
 │       ├── constants.ts                # Cell size, speeds, colours
 │       ├── wagmi.ts                    # wagmi config (Base mainnet)
+│       ├── contract.ts                 # Contract address, ABI, calldata encoder
 │       └── types.ts                    # Shared TypeScript types
 ├── public/
 │   └── .well-known/
@@ -140,6 +146,7 @@ the manifests at `/.well-known/farcaster.json` and `/.well-known/base/miniapp.js
 |------|---------------|
 | `src/lib/constants.ts` | Cell size, initial speed, obstacle count |
 | `src/lib/wagmi.ts` | Chain config, wallet connectors |
+| `src/lib/contract.ts` | Contract address, ABI, builder code |
 | `src/components/GameCanvas.tsx` | Snake/food rendering style |
 | `src/app/layout.tsx` | Frame metadata title, description |
 | `public/.well-known/base/miniapp.json` | Base Mini App manifest details |
@@ -153,6 +160,7 @@ the manifests at `/.well-known/farcaster.json` and `/.well-known/base/miniapp.js
 - **TypeScript**
 - **TailwindCSS**
 - **HTML5 Canvas**
-- **wagmi v2 + viem** (wallet connection, Base mainnet)
+- **wagmi v2 + viem** (wallet connection, on-chain calls, Base mainnet)
 - **@coinbase/wallet-sdk** (Coinbase Wallet connector)
 - **@farcaster/miniapp-sdk** (ready signal)
+- **Base Smart Contract** — leaderboard at `0xB9e2D368Cc09ad609Dc29606d88F6ac67F0132Cd`

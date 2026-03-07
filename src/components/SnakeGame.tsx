@@ -6,6 +6,8 @@ import { CELL_SIZE } from "@/lib/constants";
 import { useSnakeGame } from "@/hooks/useSnakeGame";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useMusicPlayer } from "@/hooks/useMusicPlayer";
+import { useSubmitScore } from "@/hooks/useSubmitScore";
+import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { GameCanvas } from "./GameCanvas";
 import { ScoreDisplay } from "./ScoreDisplay";
 import { WalletButton, shortenAddress } from "./WalletButton";
@@ -795,10 +797,13 @@ function AboutScreen({ onBack }: { onBack: () => void }) {
 // ─── Screen 5: Leaderboard ───────────────────────────────────────────────────
 
 function LeaderboardScreen({ onBack }: { onBack: () => void }) {
-  const [entries, setEntries] = useState<LeaderEntry[]>([]);
+  const { entries: onChainEntries, isLoading, error, refetch } = useLeaderboard();
 
-  useEffect(() => { setEntries(getLeaderboard()); }, []);
+  // Fall back to localStorage if on-chain has nothing yet
+  const [localEntries, setLocalEntries] = useState<LeaderEntry[]>([]);
+  useEffect(() => { setLocalEntries(getLeaderboard()); }, []);
 
+  const useOnChain = !isLoading && !error && onChainEntries.length > 0;
   const medals = ["🥇", "🥈", "🥉"];
 
   return (
@@ -827,6 +832,20 @@ function LeaderboardScreen({ onBack }: { onBack: () => void }) {
           LEADERBOARD
         </div>
 
+        {/* Chain badge */}
+        <div
+          style={{
+            fontFamily: "var(--font-pixel), monospace",
+            fontSize: "clamp(6px, 1.6vw, 8px)",
+            color: useOnChain ? "#1a5c30" : "#2a6010",
+            letterSpacing: 1,
+            opacity: 0.75,
+            marginTop: -6,
+          }}
+        >
+          {isLoading ? "LOADING CHAIN..." : useOnChain ? "⛓ ON-CHAIN" : "LOCAL SCORES"}
+        </div>
+
         {/* List */}
         <div
           style={{
@@ -838,7 +857,75 @@ function LeaderboardScreen({ onBack }: { onBack: () => void }) {
             maxHeight: "55dvh",
           }}
         >
-          {entries.length === 0 ? (
+          {isLoading ? (
+            <div
+              style={{
+                fontFamily: "var(--font-pixel), monospace",
+                fontSize: "clamp(8px, 2.2vw, 11px)",
+                color: "#1a3d05",
+                textAlign: "center",
+                padding: "24px 0",
+                opacity: 0.7,
+              }}
+            >
+              LOADING...
+            </div>
+          ) : useOnChain ? (
+            onChainEntries.map((e, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "10px 14px",
+                  background: i % 2 === 0 ? "rgba(200,225,155,0.88)" : "rgba(180,210,130,0.75)",
+                  border: "2px solid #1a3d05",
+                  borderRadius: 4,
+                  gap: 10,
+                }}
+              >
+                <span style={{ fontSize: 16, width: 24, textAlign: "center", flexShrink: 0 }}>
+                  {medals[i] ?? `${i + 1}.`}
+                </span>
+                <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column", gap: 2 }}>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-pixel), monospace",
+                      fontSize: "clamp(8px, 2.2vw, 11px)",
+                      color: "#1a2006",
+                      letterSpacing: 1,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {e.name || "ANON"}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-pixel), monospace",
+                      fontSize: "clamp(6px, 1.6vw, 8px)",
+                      color: "#2a6010",
+                      letterSpacing: 0.5,
+                    }}
+                  >
+                    {shortenAddress(e.player)}
+                  </span>
+                </div>
+                <span
+                  style={{
+                    fontFamily: "var(--font-pixel), monospace",
+                    fontSize: "clamp(10px, 2.8vw, 14px)",
+                    color: i === 0 ? "#c87800" : "#1a2006",
+                    fontWeight: "bold",
+                    flexShrink: 0,
+                  }}
+                >
+                  {e.score}
+                </span>
+              </div>
+            ))
+          ) : localEntries.length === 0 ? (
             <div
               style={{
                 fontFamily: "var(--font-pixel), monospace",
@@ -852,7 +939,7 @@ function LeaderboardScreen({ onBack }: { onBack: () => void }) {
               NO SCORES YET
             </div>
           ) : (
-            entries.slice(0, 10).map((e, i) => (
+            localEntries.slice(0, 10).map((e, i) => (
               <div
                 key={i}
                 style={{
@@ -911,7 +998,26 @@ function LeaderboardScreen({ onBack }: { onBack: () => void }) {
           )}
         </div>
 
-        <div style={{ width: "100%", marginTop: 4 }}>
+        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
+          {error && (
+            <button
+              onClick={() => refetch()}
+              style={{
+                fontFamily: "var(--font-pixel), monospace",
+                fontSize: "clamp(7px, 1.9vw, 9px)",
+                letterSpacing: 1,
+                padding: "8px 0",
+                background: "transparent",
+                color: "#1a3d05",
+                border: "2px solid #1a3d05",
+                borderRadius: 4,
+                cursor: "pointer",
+                opacity: 0.7,
+              }}
+            >
+              RETRY CHAIN
+            </button>
+          )}
           <MenuBtn onClick={onBack}>BACK</MenuBtn>
         </div>
       </div>
@@ -942,6 +1048,7 @@ function GameContent({
   const [grid, setGrid]             = useState({ cols: 0, rows: 0 });
   const startedRef                  = useRef(false);
   const savedRef                    = useRef(false);
+  const { submitScore: submitOnChain } = useSubmitScore();
 
   useEffect(() => {
     function measure() {
@@ -978,17 +1085,22 @@ function GameContent({
     }
   }, [grid.cols, grid.rows, startGame]);
 
-  // Save score to leaderboard on game over + play pain sound
+  // Save score to leaderboard on game over + play sound
   const prevGameStateRef = useRef<string>("");
   useEffect(() => {
     if (state.gameState === "gameover" && !savedRef.current) {
       savedRef.current = true;
+      // Always save locally as fallback
       saveScore(playerName, state.score, walletAddress);
+      // If wallet connected, also submit on-chain
+      if (walletAddress && state.score > 0) {
+        submitOnChain(playerName, state.score);
+      }
       if (prevGameStateRef.current === "playing") playGameOver();
     }
     if (state.gameState !== "gameover") savedRef.current = false;
     prevGameStateRef.current = state.gameState;
-  }, [state.gameState, state.score, playerName, playGameOver]);
+  }, [state.gameState, state.score, playerName, walletAddress, playGameOver, submitOnChain]);
 
   // Play eat sound when score increases
   const prevScoreRef = useRef(0);
