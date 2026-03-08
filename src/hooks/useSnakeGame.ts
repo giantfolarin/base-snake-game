@@ -58,21 +58,26 @@ function randomObstacles(
   rows: number,
   count: number,
 ): Position[] {
-  // Build occupied set + safe zone around snake head
+  // Build occupied set
   const occupied = new Set([
     ...snake.map((s) => `${s.x},${s.y}`),
     `${food.x},${food.y}`,
   ]);
-  // Avoid placing obstacles adjacent to the starting snake
-  const safeZone = new Set(
-    snake.flatMap((s) => [
-      `${s.x},${s.y}`,
-      `${s.x + 1},${s.y}`,
-      `${s.x - 1},${s.y}`,
-      `${s.x},${s.y + 1}`,
-      `${s.x},${s.y - 1}`,
-    ]),
-  );
+
+  // Safe zone: 3-cell radius around every snake segment
+  const safeZone = new Set<string>();
+  snake.forEach((s) => {
+    for (let dx = -3; dx <= 3; dx++) {
+      for (let dy = -3; dy <= 3; dy++) {
+        safeZone.add(`${s.x + dx},${s.y + dy}`);
+      }
+    }
+  });
+  // Extra runway: snake always starts moving RIGHT, protect 8 cells ahead
+  const head = snake[0];
+  for (let i = 1; i <= 8; i++) {
+    safeZone.add(`${head.x + i},${head.y}`);
+  }
 
   const obstacles: Position[] = [];
   let attempts = 0;
