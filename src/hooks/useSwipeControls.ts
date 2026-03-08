@@ -7,16 +7,13 @@ const SWIPE_THRESHOLD = 30; // minimum px to register a swipe
 
 export function useSwipeControls(
   onDirection: (dir: Direction) => void,
-  targetRef: React.RefObject<HTMLElement | null>
+  _targetRef?: React.RefObject<HTMLElement | null>
 ) {
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const onDirectionRef = useRef(onDirection);
   onDirectionRef.current = onDirection;
 
   useEffect(() => {
-    const el = targetRef.current;
-    if (!el) return;
-
     const handleTouchStart = (e: TouchEvent) => {
       const t = e.touches[0];
       touchStart.current = { x: t.clientX, y: t.clientY };
@@ -44,18 +41,18 @@ export function useSwipeControls(
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      // Prevent page scroll while swiping on the canvas
+      // Prevent page scroll while swiping anywhere on screen
       e.preventDefault();
     };
 
-    el.addEventListener("touchstart", handleTouchStart, { passive: true });
-    el.addEventListener("touchend", handleTouchEnd, { passive: true });
-    el.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     return () => {
-      el.removeEventListener("touchstart", handleTouchStart);
-      el.removeEventListener("touchend", handleTouchEnd);
-      el.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("touchmove", handleTouchMove);
     };
-  }, [targetRef]);
+  }, []);
 }
