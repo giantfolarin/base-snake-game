@@ -25,13 +25,13 @@ export async function GET() {
 
     frame: {
       version: "1",
-      name: "Skeletal Snake",
+      name: "Snake",
       iconUrl: `${APP_URL}/icon.png`,
       homeUrl: APP_URL,
       imageUrl: `${APP_URL}/og-image.png`,
       buttonTitle: "Play Snake",
       splashImageUrl: `${APP_URL}/splash.png`,
-      splashBackgroundColor: "#0d0520",
+      splashBackgroundColor: "#84c234",
 
       // Optional: webhook for notifications
       // webhookUrl: `${APP_URL}/api/webhook`,
