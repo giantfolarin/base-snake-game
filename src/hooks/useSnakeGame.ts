@@ -264,26 +264,36 @@ export function useSnakeGame(gridCols: number, gridRows: number, initialHighScor
     })
   );
 
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const stateRef = useRef(state);
-  stateRef.current = state;
+  const rafRef       = useRef<number | null>(null);
+  const lastTickRef  = useRef<number>(0);
+  const stateRef     = useRef(state);
+  stateRef.current   = state;
 
-  // ── Game loop ───────────────────────────────────────────────────────────────
+  // ── Game loop (requestAnimationFrame — pauses automatically when hidden) ────
   const stopLoop = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
     }
   }, []);
 
   const startLoop = useCallback(
     (speed: number) => {
       stopLoop();
-      intervalRef.current = setInterval(() => {
-        dispatch({ type: "TICK" });
-      }, speed);
+      lastTickRef.current = 0; // reset so first tick fires promptly
+
+      const loop = (ts: number) => {
+        rafRef.current = requestAnimationFrame(loop);
+        if (lastTickRef.current === 0) lastTickRef.current = ts;
+        if (ts - lastTickRef.current >= speed) {
+          lastTickRef.current = ts; // reset to NOW — never accumulate missed ticks
+          dispatch({ type: "TICK" });
+        }
+      };
+
+      rafRef.current = requestAnimationFrame(loop);
     },
-    [stopLoop]
+    [stopLoop],
   );
 
   useEffect(() => {
