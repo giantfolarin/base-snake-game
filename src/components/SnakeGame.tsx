@@ -12,6 +12,20 @@ import { GameCanvas } from "./GameCanvas";
 import { ScoreDisplay } from "./ScoreDisplay";
 import { WalletButton, shortenAddress } from "./WalletButton";
 
+// ─── Player name persistence (one name per wallet) ────────────────────────────
+
+function getSavedName(walletAddress?: string): string {
+  if (typeof window === "undefined") return "";
+  const key = walletAddress ? `snake-name-${walletAddress.toLowerCase()}` : "snake-name-guest";
+  return localStorage.getItem(key) ?? "";
+}
+
+function setSavedName(name: string, walletAddress?: string) {
+  if (typeof window === "undefined") return;
+  const key = walletAddress ? `snake-name-${walletAddress.toLowerCase()}` : "snake-name-guest";
+  localStorage.setItem(key, name);
+}
+
 // ─── Leaderboard helpers ──────────────────────────────────────────────────────
 
 type LeaderEntry = { name: string; score: number; walletAddress?: string };
@@ -60,6 +74,22 @@ export function SnakeGame() {
   const [musicOn, setMusicOn]     = useState(true);
   const { address: walletAddress } = useAccount();
 
+  // Load saved name on mount and when wallet connects
+  useEffect(() => {
+    const saved = getSavedName(walletAddress);
+    if (saved) setPlayerName(saved);
+  }, [walletAddress]);
+
+  function handlePlay() {
+    const saved = getSavedName(walletAddress);
+    if (saved) {
+      setPlayerName(saved);
+      setScreen("game");
+    } else {
+      setScreen("name-entry");
+    }
+  }
+
   function handleShare() {
     if (typeof navigator !== "undefined" && navigator.share) {
       navigator
@@ -71,7 +101,7 @@ export function SnakeGame() {
   if (screen === "home") {
     return (
       <HomeScreen
-        onPlay={() => setScreen("name-entry")}
+        onPlay={handlePlay}
         onSettings={() => setScreen("settings")}
         onLeaderboard={() => setScreen("leaderboard")}
         onAbout={() => setScreen("about")}
@@ -82,7 +112,7 @@ export function SnakeGame() {
   if (screen === "name-entry") {
     return (
       <NameEntryScreen
-        onConfirm={(name) => { setPlayerName(name); setScreen("game"); }}
+        onConfirm={(name) => { setSavedName(name, walletAddress); setPlayerName(name); setScreen("game"); }}
         onBack={() => setScreen("home")}
       />
     );
