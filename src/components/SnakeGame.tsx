@@ -49,12 +49,12 @@ function getPlayerBest(name: string): number {
 
 // ─── Screen types ─────────────────────────────────────────────────────────────
 
-type Screen = "home" | "name-entry" | "game" | "settings" | "leaderboard" | "about";
+type Screen = "wallet" | "home" | "name-entry" | "game" | "settings" | "leaderboard" | "about";
 
 // ─── Root component ───────────────────────────────────────────────────────────
 
 export function SnakeGame() {
-  const [screen, setScreen]       = useState<Screen>("home");
+  const [screen, setScreen]       = useState<Screen>("wallet");
   const [playerName, setPlayerName] = useState("");
   const [soundOn, setSoundOn]     = useState(true);
   const [musicOn, setMusicOn]     = useState(true);
@@ -66,6 +66,10 @@ export function SnakeGame() {
         .share({ title: "Snake", text: "I just played Snake on Base! 🐍", url: window.location.href })
         .catch(() => {});
     }
+  }
+
+  if (screen === "wallet") {
+    return <WalletConnectScreen onContinue={() => setScreen("home")} />;
   }
 
   if (screen === "home") {
@@ -390,6 +394,81 @@ function HomeSnakeCanvas() {
         opacity: 0.55,
       }}
     />
+  );
+}
+
+// ─── Screen 0: Wallet Connect ─────────────────────────────────────────────────
+
+function WalletConnectScreen({ onContinue }: { onContinue: () => void }) {
+  const { isConnected, address } = useAccount();
+
+  return (
+    <GreenBg>
+      <div
+        style={{
+          width: "min(90vw, 360px)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 14,
+        }}
+      >
+        {/* Title */}
+        <div
+          style={{
+            fontFamily: "var(--font-pixel), monospace",
+            fontSize: "clamp(38px, 12vw, 60px)",
+            color: "#1a2006",
+            letterSpacing: "clamp(3px, 1vw, 8px)",
+            textShadow: "3px 3px 0 rgba(0,0,0,0.22)",
+            animation: "pixelPop 0.4s ease both",
+            userSelect: "none",
+            lineHeight: 1,
+            marginBottom: 2,
+          }}
+        >
+          SNAKE
+        </div>
+
+        {/* Divider */}
+        <div style={{ width: "100%", height: 2, background: "#1a3d05", opacity: 0.3, borderRadius: 1 }} />
+
+        {/* Info text */}
+        <div
+          style={{
+            fontFamily: "var(--font-pixel), monospace",
+            fontSize: "clamp(7px, 1.9vw, 9px)",
+            color: "#1a3d05",
+            letterSpacing: 1,
+            lineHeight: 2,
+            textAlign: "center",
+            padding: "0 4px",
+          }}
+        >
+          {isConnected
+            ? "WALLET CONNECTED. SCORES\nWILL BE SAVED ON-CHAIN."
+            : "CONNECT YOUR WALLET TO\nSAVE SCORES ON BASE."}
+        </div>
+
+        {/* Wallet section */}
+        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
+          <WalletButton />
+        </div>
+
+        {/* Divider */}
+        <div style={{ width: "100%", height: 2, background: "#1a3d05", opacity: 0.3, borderRadius: 1 }} />
+
+        {/* Continue */}
+        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
+          <MenuBtn onClick={onContinue} primary icon="🎮">
+            {isConnected ? `PLAY  (${address ? shortenAddress(address) : ""})` : "PLAY GAME"}
+          </MenuBtn>
+          {!isConnected && (
+            <MenuBtn onClick={onContinue}>SKIP — PLAY OFFLINE</MenuBtn>
+          )}
+        </div>
+      </div>
+    </GreenBg>
   );
 }
 
@@ -1048,7 +1127,7 @@ function GameContent({
   const [grid, setGrid]             = useState({ cols: 0, rows: 0 });
   const startedRef                  = useRef(false);
   const savedRef                    = useRef(false);
-  const { submitScore: submitOnChain } = useSubmitScore();
+  const { submitScore: submitOnChain, isPending: savePending, isSuccess: saveSuccess } = useSubmitScore();
 
   useEffect(() => {
     function measure() {
@@ -1085,22 +1164,17 @@ function GameContent({
     }
   }, [grid.cols, grid.rows, startGame]);
 
-  // Save score to leaderboard on game over + play sound
+  // Save score locally on game over + play sound
   const prevGameStateRef = useRef<string>("");
   useEffect(() => {
     if (state.gameState === "gameover" && !savedRef.current) {
       savedRef.current = true;
-      // Always save locally as fallback
       saveScore(playerName, state.score, walletAddress);
-      // If wallet connected, also submit on-chain
-      if (walletAddress && state.score > 0) {
-        submitOnChain(playerName, state.score);
-      }
       if (prevGameStateRef.current === "playing") playGameOver();
     }
     if (state.gameState !== "gameover") savedRef.current = false;
     prevGameStateRef.current = state.gameState;
-  }, [state.gameState, state.score, playerName, walletAddress, playGameOver, submitOnChain]);
+  }, [state.gameState, state.score, playerName, walletAddress, playGameOver]);
 
   // Play eat sound when score increases
   const prevScoreRef = useRef(0);
@@ -1167,6 +1241,9 @@ function GameContent({
           score={state.score}
           highScore={state.highScore}
           playerName={playerName}
+          onSaveScore={walletAddress && state.score > 0 ? () => submitOnChain(playerName, state.score) : undefined}
+          savePending={savePending}
+          saveSuccess={saveSuccess}
           onRestart={restartGame}
           onSelect={onClose}
         />
@@ -1182,14 +1259,20 @@ function GameOverOverlay({
   score,
   highScore,
   playerName,
+  onSaveScore,
+  savePending,
+  saveSuccess,
   onRestart,
   onSelect,
 }: {
-  score:      number;
-  highScore:  number;
-  playerName: string;
-  onRestart:  () => void;
-  onSelect:   () => void;
+  score:         number;
+  highScore:     number;
+  playerName:    string;
+  onSaveScore?:  () => void;
+  savePending?:  boolean;
+  saveSuccess?:  boolean;
+  onRestart:     () => void;
+  onSelect:      () => void;
 }) {
   const isNewBest = score > 0 && score === highScore;
 
@@ -1308,9 +1391,34 @@ function GameOverOverlay({
         </div>
       </div>
 
+      {/* On-chain save button */}
+      {onSaveScore && (
+        <button
+          onClick={saveSuccess ? undefined : onSaveScore}
+          disabled={savePending || saveSuccess}
+          style={{
+            marginTop: 18,
+            fontFamily: "var(--font-pixel), monospace",
+            fontSize: "clamp(8px, 2.2vw, 11px)",
+            letterSpacing: 2,
+            padding: "10px 20px",
+            background: saveSuccess ? "rgba(132,194,52,0.2)" : "rgba(255,215,0,0.15)",
+            color: saveSuccess ? "#84c234" : "#FFD700",
+            border: `2px solid ${saveSuccess ? "#84c234" : "#FFD700"}`,
+            borderRadius: 6,
+            cursor: savePending || saveSuccess ? "default" : "pointer",
+            opacity: savePending ? 0.6 : 1,
+            animation: "slideUp 0.4s ease 0.2s both",
+            minWidth: 200,
+          }}
+        >
+          {saveSuccess ? "⛓ SAVED ON-CHAIN ✓" : savePending ? "SAVING..." : "⛓ SAVE SCORE ON-CHAIN"}
+        </button>
+      )}
+
       <div
         style={{
-          marginTop: 28,
+          marginTop: 16,
           display: "flex",
           flexDirection: "column",
           gap: 12,

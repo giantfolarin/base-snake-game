@@ -305,6 +305,17 @@ export function useSnakeGame(gridCols: number, gridRows: number, initialHighScor
     return stopLoop;
   }, [state.gameState, state.speed, startLoop, stopLoop]);
 
+  // ── Auto-pause when page is hidden (wallet popup, switching apps) ───────────
+  useEffect(() => {
+    const onHide = () => {
+      if (stateRef.current.gameState === "playing") {
+        dispatch({ type: "PAUSE_GAME" });
+      }
+    };
+    document.addEventListener("visibilitychange", onHide);
+    return () => document.removeEventListener("visibilitychange", onHide);
+  }, []);
+
   // ── Keyboard controls ───────────────────────────────────────────────────────
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
