@@ -1128,6 +1128,8 @@ function GameContent({
         score={state.score}
         highScore={state.highScore}
         soundOn={soundOn}
+        isPaused={isPaused}
+        onPause={togglePause}
         onSoundToggle={onSoundToggle}
         onShare={onShare}
         onClose={onClose}

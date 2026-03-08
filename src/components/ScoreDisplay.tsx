@@ -4,6 +4,8 @@ interface ScoreDisplayProps {
   score: number;
   highScore: number;
   soundOn: boolean;
+  isPaused: boolean;
+  onPause: () => void;
   onSoundToggle: () => void;
   onShare: () => void;
   onClose: () => void;
@@ -13,6 +15,8 @@ export function ScoreDisplay({
   score,
   highScore,
   soundOn,
+  isPaused,
+  onPause,
   onSoundToggle,
   onShare,
   onClose,
@@ -67,6 +71,9 @@ export function ScoreDisplay({
 
       {/* Right controls */}
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <TopBarBtn onClick={onPause} label={isPaused ? "Resume game" : "Pause game"}>
+          <PauseIcon isPaused={isPaused} />
+        </TopBarBtn>
         <TopBarBtn onClick={onSoundToggle} label="Toggle sound">
           <span style={{ fontSize: 18 }}>{soundOn ? "🔊" : "🔇"}</span>
         </TopBarBtn>
@@ -110,6 +117,21 @@ function TopBarBtn({
     >
       {children}
     </button>
+  );
+}
+
+function PauseIcon({ isPaused }: { isPaused: boolean }) {
+  return isPaused ? (
+    // Play triangle
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="white">
+      <polygon points="3,1 15,8 3,15" />
+    </svg>
+  ) : (
+    // Two pause bars
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="white">
+      <rect x="2" y="2" width="4" height="12" rx="1" />
+      <rect x="10" y="2" width="4" height="12" rx="1" />
+    </svg>
   );
 }
 
