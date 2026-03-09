@@ -10,7 +10,7 @@ const PLAYLIST = [
   "/sounds/music/gozalo.mp3",
 ];
 
-function randomIndex(exclude?: number): number {
+function pickRandom(exclude?: number): number {
   if (PLAYLIST.length === 1) return 0;
   let idx: number;
   do { idx = Math.floor(Math.random() * PLAYLIST.length); } while (idx === exclude);
@@ -18,66 +18,40 @@ function randomIndex(exclude?: number): number {
 }
 
 export function useMusicPlayer(enabled: boolean, gameState: string) {
-  const audioRef    = useRef<HTMLAudioElement | null>(null);
-  const indexRef    = useRef<number>(randomIndex());
-  const preloadedRef = useRef(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const trackRef = useRef(pickRandom());
 
-  // Preload a random track on mount so it's ready instantly when game starts
+  // Create audio element once on mount and preload immediately
   useEffect(() => {
-    if (preloadedRef.current) return;
-    preloadedRef.current = true;
-    indexRef.current = randomIndex();
-    const audio = new Audio(PLAYLIST[indexRef.current]);
+    const audio = new Audio(PLAYLIST[trackRef.current]);
     audio.volume = 0.55;
     audio.preload = "auto";
-    audio.onended = () => {
-      indexRef.current = randomIndex(indexRef.current);
-      audio.src = PLAYLIST[indexRef.current];
+
+    function onEnded() {
+      trackRef.current = pickRandom(trackRef.current);
+      audio.src = PLAYLIST[trackRef.current];
       audio.play().catch(() => {});
-    };
+    }
+
+    audio.addEventListener("ended", onEnded);
     audioRef.current = audio;
+
+    return () => {
+      audio.removeEventListener("ended", onEnded);
+      audio.pause();
+      audioRef.current = null;
+    };
   }, []);
 
+  // Play or pause — no reloading, no src swaps mid-game
   useEffect(() => {
-    const shouldPlay = enabled && gameState === "playing";
+    const audio = audioRef.current;
+    if (!audio) return;
 
-    if (shouldPlay) {
-      if (!audioRef.current) {
-        indexRef.current = randomIndex();
-        const audio = new Audio(PLAYLIST[indexRef.current]);
-        audio.volume = 0.55;
-        audio.preload = "auto";
-        audio.onended = () => {
-          indexRef.current = randomIndex(indexRef.current);
-          audio.src = PLAYLIST[indexRef.current];
-          audio.play().catch(() => {});
-        };
-        audioRef.current = audio;
-      }
-      audioRef.current.play().catch(() => {});
+    if (enabled && gameState === "playing") {
+      audio.play().catch(() => {});
     } else {
-      audioRef.current?.pause();
-      if (gameState === "gameover" || gameState === "idle") {
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
-          // Pick a new random track for next game
-          indexRef.current = randomIndex(indexRef.current);
-          audioRef.current.src = PLAYLIST[indexRef.current];
-          audioRef.current.load();
-        }
-      }
+      audio.pause();
     }
   }, [enabled, gameState]);
-
-  // Stop and clean up when component unmounts
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.onended = null;
-        audioRef.current = null;
-      }
-    };
-  }, []);
 }
