@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     "base:app_id": "69aca59ff6467f4d78d30199",
     "fc:frame": JSON.stringify({
       version: "next",
-      imageUrl: `${APP_URL}/og-image.jpeg`,
+      imageUrl: `${APP_URL}/og-image.png`,
       button: {
         title: "Play Snake",
         action: {

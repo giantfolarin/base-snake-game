@@ -22,7 +22,7 @@ export async function GET() {
       description: "Classic retro snake game built on Base. Eat apples, dodge obstacles, climb the leaderboard, and save your score on-chain.",
       iconUrl: `${appUrl}/icon.png`,
       homeUrl: appUrl,
-      imageUrl: `${appUrl}/og-image.jpeg`,
+      imageUrl: `${appUrl}/og-image.png`,
       buttonTitle: "Play Snake",
       splashImageUrl: `${appUrl}/splash.png`,
       splashBackgroundColor: "#84c234",
