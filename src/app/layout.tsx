@@ -11,7 +11,7 @@ const pixelFont = Press_Start_2P({
 });
 
 // Mini App frame metadata — Farcaster / Base Mini App spec
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://your-domain.com";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://snakebase.xyz";
 
 export const metadata: Metadata = {
   title: "Snake | Base Mini App",
