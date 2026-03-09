@@ -10,21 +10,45 @@ const PLAYLIST = [
   "/sounds/music/gozalo.mp3",
 ];
 
+function randomIndex(exclude?: number): number {
+  if (PLAYLIST.length === 1) return 0;
+  let idx: number;
+  do { idx = Math.floor(Math.random() * PLAYLIST.length); } while (idx === exclude);
+  return idx;
+}
+
 export function useMusicPlayer(enabled: boolean, gameState: string) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const indexRef = useRef(0);
+  const audioRef    = useRef<HTMLAudioElement | null>(null);
+  const indexRef    = useRef<number>(randomIndex());
+  const preloadedRef = useRef(false);
+
+  // Preload a random track on mount so it's ready instantly when game starts
+  useEffect(() => {
+    if (preloadedRef.current) return;
+    preloadedRef.current = true;
+    indexRef.current = randomIndex();
+    const audio = new Audio(PLAYLIST[indexRef.current]);
+    audio.volume = 0.55;
+    audio.preload = "auto";
+    audio.onended = () => {
+      indexRef.current = randomIndex(indexRef.current);
+      audio.src = PLAYLIST[indexRef.current];
+      audio.play().catch(() => {});
+    };
+    audioRef.current = audio;
+  }, []);
 
   useEffect(() => {
     const shouldPlay = enabled && gameState === "playing";
 
     if (shouldPlay) {
-      // Create a fresh audio element at game start (after idle/gameover reset)
       if (!audioRef.current) {
-        indexRef.current = 0;
-        const audio = new Audio(PLAYLIST[0]);
+        indexRef.current = randomIndex();
+        const audio = new Audio(PLAYLIST[indexRef.current]);
         audio.volume = 0.55;
+        audio.preload = "auto";
         audio.onended = () => {
-          indexRef.current = (indexRef.current + 1) % PLAYLIST.length;
+          indexRef.current = randomIndex(indexRef.current);
           audio.src = PLAYLIST[indexRef.current];
           audio.play().catch(() => {});
         };
@@ -33,13 +57,15 @@ export function useMusicPlayer(enabled: boolean, gameState: string) {
       audioRef.current.play().catch(() => {});
     } else {
       audioRef.current?.pause();
-      // Reset playlist position when game ends so next game starts fresh
       if (gameState === "gameover" || gameState === "idle") {
         if (audioRef.current) {
-          audioRef.current.onended = null;
-          audioRef.current = null;
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+          // Pick a new random track for next game
+          indexRef.current = randomIndex(indexRef.current);
+          audioRef.current.src = PLAYLIST[indexRef.current];
+          audioRef.current.load();
         }
-        indexRef.current = 0;
       }
     }
   }, [enabled, gameState]);
