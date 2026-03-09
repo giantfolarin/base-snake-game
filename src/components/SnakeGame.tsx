@@ -1165,8 +1165,8 @@ function GameContent({
       if (!el) return;
       const { width, height } = el.getBoundingClientRect();
       if (width === 0 || height === 0) return;
-      const cols = Math.max(10, Math.floor(width  / CELL_SIZE));
-      const rows = Math.max(8,  Math.floor(height / CELL_SIZE));
+      const cols = Math.max(10, Math.floor((width  - 8) / CELL_SIZE));
+      const rows = Math.max(8,  Math.floor((height - 8) / CELL_SIZE));
       setCanvasSize({ w: cols * CELL_SIZE, h: rows * CELL_SIZE });
       setGrid({ cols, rows });
     }

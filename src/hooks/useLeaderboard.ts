@@ -26,6 +26,19 @@ export function useLeaderboard() {
           score:     Number(e.score),
           timestamp: Number(e.timestamp),
         }))
+        // Keep only the highest score per wallet address
+        .reduce((acc, entry) => {
+          const existing = acc.find(
+            (e) => e.player.toLowerCase() === entry.player.toLowerCase()
+          );
+          if (!existing) {
+            acc.push(entry);
+          } else if (entry.score > existing.score) {
+            existing.score = entry.score;
+            existing.name  = entry.name;
+          }
+          return acc;
+        }, [] as OnChainEntry[])
         .sort((a, b) => b.score - a.score)
     : [];
 
