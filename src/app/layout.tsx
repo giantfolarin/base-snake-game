@@ -25,7 +25,7 @@ export const metadata: Metadata = {
         title: "Play Snake",
         action: {
           type: "launch_frame",
-          name: "Snake",
+          name: "SnakeBase",
           url: APP_URL,
           splashImageUrl: `${APP_URL}/splash.png`,
           splashBackgroundColor: "#84c234",
