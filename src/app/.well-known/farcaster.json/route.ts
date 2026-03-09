@@ -20,7 +20,7 @@ export async function GET() {
       name: "Snake",
       iconUrl: `${appUrl}/icon.png`,
       homeUrl: appUrl,
-      imageUrl: `${appUrl}/og-image.png`,
+      imageUrl: `${appUrl}/og-image.jpeg`,
       buttonTitle: "Play Snake",
       splashImageUrl: `${appUrl}/splash.png`,
       splashBackgroundColor: "#84c234",
