@@ -2,7 +2,7 @@
   "name": "SnakeBase",
   "description": "A fast, responsive snake game built for the Base ecosystem.",
   "url": "https://snakebase.xyz",
-  "icon": "https://snakebase.xyz/app-icon.png?v=3",
+  "icon": "https://snakebase.xyz/app-icon.png",
   "developer": {
     "name": "SnakeBase",
     "url": "https://snakebase.xyz"
