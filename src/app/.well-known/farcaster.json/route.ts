@@ -20,7 +20,7 @@ export async function GET() {
       name: "SnakeBase",
       subtitle: "Retro Classic Snake Game",
       description: "Classic retro snake game built on Base. Eat apples, dodge obstacles, climb the leaderboard, and save your score on-chain.",
-      iconUrl: `${appUrl}/icon.png`,
+      iconUrl: `${appUrl}/app-icon.png`,
       homeUrl: appUrl,
       imageUrl: `${appUrl}/og-image.png`,
       buttonTitle: "Play Snake",

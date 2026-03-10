@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   title: "Snake | Base Mini App",
   description: "Classic Snake game built as a Base Mini App",
   icons: {
-    icon: `${APP_URL}/icon.png`,
-    apple: `${APP_URL}/icon.png`,
+    icon: `${APP_URL}/app-icon.png`,
+    apple: `${APP_URL}/app-icon.png`,
   },
   other: {
     "base:app_id": "69aca59ff6467f4d78d30199",

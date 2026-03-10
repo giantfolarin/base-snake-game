@@ -14,7 +14,7 @@ const nextConfig = {
       },
       {
         // Ensure icon, splash, og-image are cached and accessible cross-origin
-        source: "/:file(icon|splash|og-image|screenshot1|screenshot2|screenshot3).:ext(png|jpg)",
+        source: "/:file(icon|app-icon|splash|og-image|screenshot1|screenshot2|screenshot3).:ext(png|jpg)",
         headers: [
           { key: "Access-Control-Allow-Origin", value: "*" },
           { key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" },
