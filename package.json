@@ -12,6 +12,7 @@
     "@coinbase/wallet-sdk": "^4.3.7",
     "@farcaster/miniapp-sdk": "^0.2.3",
     "@tanstack/react-query": "^5.51.0",
+    "@upstash/redis": "^1.36.4",
     "autoprefixer": "^10.4.27",
     "next": "14.2.5",
     "react": "^18.3.1",
