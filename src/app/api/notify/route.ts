@@ -63,8 +63,8 @@ async function handleNotify(req: NextRequest) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           notificationId,
-          title:     "🐍 Time to play SnakeBase!",
-          body:      "Your high score is waiting to be beaten. Jump back in!",
+          title:     "Time to play SnakeBase!",
+          body:      "New week, new chance to climb the SnakeBase leaderboard. Beat your previous high score and climb higher. Top players may unlock rewards 👀",
           targetUrl: APP_URL,
           tokens,
         }),
