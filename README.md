@@ -117,16 +117,18 @@ Place these images in the `/public` folder:
 
 ### Step 3 — Generate accountAssociation
 
-1. Go to [https://warpcast.com/~/developers/frames](https://warpcast.com/~/developers/frames)
-2. Enter your production domain
-3. Sign with your Farcaster account
-4. Copy the `header`, `payload`, and `signature` values
-5. Paste them into `src/app/.well-known/farcaster.json/route.ts`
+1. Go to [https://farcaster.xyz/~/developers/mini-apps/manifest?domain=snakebase.xyz](https://farcaster.xyz/~/developers/mini-apps/manifest?domain=snakebase.xyz) (replace `snakebase.xyz` with your domain)
+2. Enter your production domain (without `https://`)
+3. Sign with your Farcaster account to generate the domain manifest
+4. Copy the `header`, `payload`, and `signature` values from the `accountAssociation` object
+5. Add them as environment variables in Vercel: `FARCASTER_HEADER`, `FARCASTER_PAYLOAD`, `FARCASTER_SIGNATURE`
+6. Redeploy — the manifest at `/.well-known/farcaster.json` will automatically include them
+7. Return to the Farcaster Manifests page and click **Check domain status** to verify
 
 ### Step 4 — Register with Base / Farcaster
 
-Share your frame URL in Warpcast or submit it to the Base Mini App directory.
-The frame will be discovered via the `fc:frame` meta tag in `layout.tsx` and
+Share your Mini App URL in Farcaster or submit it to the Base Mini App directory.
+The app will be discovered via the `fc:frame` meta tag in `layout.tsx` and
 the manifests at `/.well-known/farcaster.json` and `/.well-known/base/miniapp.json`.
 
 ---

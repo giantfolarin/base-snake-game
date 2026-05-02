@@ -11,12 +11,15 @@
 html,
 body {
   height: 100%;
+  width: 100%;
   margin: 0;
   padding: 0;
   background-color: #84c234;
   color: #1a3d05;
   font-family: var(--font-pixel), "Courier New", Courier, monospace;
   overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  overflow: hidden;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }

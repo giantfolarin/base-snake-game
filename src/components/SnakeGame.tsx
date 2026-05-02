@@ -1226,6 +1226,8 @@ function GameContent({
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
+        overscrollBehavior: "none",
+        touchAction: "none",
         position: "relative",
       }}
     >
@@ -1249,6 +1251,8 @@ function GameContent({
           alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
+          overscrollBehavior: "none",
+          touchAction: "none",
         }}
       >
         {canvasSize.w > 0 && grid.cols > 0 && (
